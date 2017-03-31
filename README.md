@@ -10,6 +10,8 @@
 
 > An easily internationalizable, mobile-friendly datepicker library for the web.
 
+**NOTE** This is our own fork of Airbnb's project, with our own custom color scheme. [Take a look at the original project if you're looking for a great datepicker!](https://github.com/airbnb/react-dates)
+
 ![react-dates in action](https://raw.githubusercontent.com/airbnb/react-dates/master/react-dates-demo.gif)
 
 ## Live Playground
