@@ -108,5 +108,8 @@
     "react": ">=0.14",
     "react-dom": ">=0.14",
     "react-addons-shallow-compare": ">=0.14"
+  },
+  "publishConfig": {
+    "registry": "http://npmregistry.density.rodeo"
   }
 }
