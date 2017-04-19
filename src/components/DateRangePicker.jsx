@@ -11,6 +11,7 @@ import { DateRangePickerPhrases } from '../defaultPhrases';
 
 import OutsideClickHandler from './OutsideClickHandler';
 import getResponsiveContainerStyles from '../utils/getResponsiveContainerStyles';
+import isTouchDevice from '../utils/isTouchDevice';
 
 import isInclusivelyAfterDay from '../utils/isInclusivelyAfterDay';
 
@@ -28,6 +29,7 @@ import {
   VERTICAL_ORIENTATION,
   ANCHOR_LEFT,
   ANCHOR_RIGHT,
+  DAY_SIZE,
 } from '../../constants';
 
 const propTypes = forbidExtraProps(DateRangePickerShape);
@@ -63,12 +65,16 @@ const defaultProps = {
   keepOpenOnDateSelect: false,
   reopenPickerOnClearDates: false,
   renderCalendarInfo: null,
+  daySize: DAY_SIZE,
 
   // navigation related props
   navPrev: null,
   navNext: null,
+
   onPrevMonthClick() {},
   onNextMonthClick() {},
+
+  onClose() {},
 
   // day presentation and interaction related props
   renderDay: null,
@@ -89,9 +95,18 @@ export default class DateRangePicker extends React.Component {
     super(props);
     this.state = {
       dayPickerContainerStyles: {},
+      isDateRangePickerInputFocused: false,
+      isDayPickerFocused: false,
+      showKeyboardShortcuts: false,
     };
 
+    this.isTouchDevice = false;
+
     this.onOutsideClick = this.onOutsideClick.bind(this);
+    this.onDateRangePickerInputFocus = this.onDateRangePickerInputFocus.bind(this);
+    this.onDayPickerFocus = this.onDayPickerFocus.bind(this);
+    this.onDayPickerBlur = this.onDayPickerBlur.bind(this);
+    this.showKeyboardShortcutsPanel = this.showKeyboardShortcutsPanel.bind(this);
 
     this.responsivizePickerPosition = this.responsivizePickerPosition.bind(this);
   }
@@ -104,6 +119,14 @@ export default class DateRangePicker extends React.Component {
       { passive: true },
     );
     this.responsivizePickerPosition();
+
+    if (this.props.focusedInput) {
+      this.setState({
+        isDateRangePickerInputFocused: true,
+      });
+    }
+
+    this.isTouchDevice = isTouchDevice();
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -118,14 +141,55 @@ export default class DateRangePicker extends React.Component {
   }
 
   componentWillUnmount() {
-    removeEventListener(this.resizeHandle);
+    if (this.resizeHandle) removeEventListener(this.resizeHandle);
   }
 
   onOutsideClick() {
-    const { onFocusChange } = this.props;
+    const { onFocusChange, onClose, startDate, endDate } = this.props;
     if (!this.isOpened()) return;
 
+    this.setState({
+      isDateRangePickerInputFocused: false,
+      isDayPickerFocused: false,
+      showKeyboardShortcuts: false,
+    });
+
     onFocusChange(null);
+    onClose({ startDate, endDate });
+  }
+
+  onDateRangePickerInputFocus(focusedInput) {
+    const { onFocusChange, withPortal, withFullScreenPortal } = this.props;
+
+    if (focusedInput) {
+      const moveFocusToDayPicker = withPortal || withFullScreenPortal || this.isTouchDevice;
+      if (moveFocusToDayPicker) {
+        this.onDayPickerFocus();
+      } else {
+        this.onDayPickerBlur();
+      }
+    }
+
+    onFocusChange(focusedInput);
+  }
+
+  onDayPickerFocus() {
+    const { focusedInput, onFocusChange } = this.props;
+    if (!focusedInput) onFocusChange(START_DATE);
+
+    this.setState({
+      isDateRangePickerInputFocused: false,
+      isDayPickerFocused: true,
+      showKeyboardShortcuts: false,
+    });
+  }
+
+  onDayPickerBlur() {
+    this.setState({
+      isDateRangePickerInputFocused: true,
+      isDayPickerFocused: false,
+      showKeyboardShortcuts: false,
+    });
   }
 
   getDayPickerContainerClasses() {
@@ -182,6 +246,14 @@ export default class DateRangePicker extends React.Component {
     }
   }
 
+  showKeyboardShortcutsPanel() {
+    this.setState({
+      isDateRangePickerInputFocused: false,
+      isDayPickerFocused: true,
+      showKeyboardShortcuts: true,
+    });
+  }
+
   maybeRenderDayPickerWithPortal() {
     const { withPortal, withFullScreenPortal } = this.props;
 
@@ -216,6 +288,7 @@ export default class DateRangePicker extends React.Component {
       onFocusChange,
       withPortal,
       withFullScreenPortal,
+      daySize,
       enableOutsideDays,
       focusedInput,
       startDate,
@@ -226,8 +299,10 @@ export default class DateRangePicker extends React.Component {
       renderCalendarInfo,
       initialVisibleMonth,
       customCloseIcon,
+      onClose,
+      phrases,
     } = this.props;
-    const { dayPickerContainerStyles } = this.state;
+    const { dayPickerContainerStyles, isDayPickerFocused, showKeyboardShortcuts } = this.state;
 
     const onOutsideClick = (!withFullScreenPortal && withPortal)
       ? this.onOutsideClick
@@ -238,10 +313,11 @@ export default class DateRangePicker extends React.Component {
     const closeIcon = customCloseIcon || (<CloseButton />);
 
     return (
-      <div
+      <div // eslint-disable-line jsx-a11y/no-static-element-interactions
         ref={(ref) => { this.dayPickerContainer = ref; }}
         className={this.getDayPickerContainerClasses()}
         style={dayPickerContainerStyles}
+        onClick={onOutsideClick}
       >
         <DayPickerRangeController
           ref={(ref) => { this.dayPicker = ref; }}
@@ -252,13 +328,14 @@ export default class DateRangePicker extends React.Component {
           onNextMonthClick={onNextMonthClick}
           onDatesChange={onDatesChange}
           onFocusChange={onFocusChange}
+          onClose={onClose}
           focusedInput={focusedInput}
           startDate={startDate}
           endDate={endDate}
           monthFormat={monthFormat}
           withPortal={withPortal || withFullScreenPortal}
+          daySize={daySize}
           initialVisibleMonth={initialVisibleMonthThunk}
-          onOutsideClick={onOutsideClick}
           navPrev={navPrev}
           navNext={navNext}
           minimumNights={minimumNights}
@@ -268,6 +345,10 @@ export default class DateRangePicker extends React.Component {
           keepOpenOnDateSelect={keepOpenOnDateSelect}
           renderDay={renderDay}
           renderCalendarInfo={renderCalendarInfo}
+          isFocused={isDayPickerFocused}
+          showKeyboardShortcuts={showKeyboardShortcuts}
+          onBlur={this.onDayPickerBlur}
+          phrases={phrases}
         />
 
         {withFullScreenPortal && (
@@ -275,10 +356,8 @@ export default class DateRangePicker extends React.Component {
             className="DateRangePicker__close"
             type="button"
             onClick={this.onOutsideClick}
+            aria-label={phrases.closeDatePicker}
           >
-            <span className="screen-reader-only">
-              {this.props.phrases.closeDatePicker}
-            </span>
             <div className="DateRangePicker__close">
               {closeIcon}
             </div>
@@ -313,8 +392,10 @@ export default class DateRangePicker extends React.Component {
       reopenPickerOnClearDates,
       keepOpenOnDateSelect,
       onDatesChange,
-      onFocusChange,
+      onClose,
     } = this.props;
+
+    const { isDateRangePickerInputFocused } = this.state;
 
     const onOutsideClick = (!withPortal && !withFullScreenPortal) ? this.onOutsideClick : undefined;
 
@@ -344,9 +425,13 @@ export default class DateRangePicker extends React.Component {
             isOutsideRange={isOutsideRange}
             withFullScreenPortal={withFullScreenPortal}
             onDatesChange={onDatesChange}
-            onFocusChange={onFocusChange}
+            onFocusChange={this.onDateRangePickerInputFocus}
+            onArrowDown={this.onDayPickerFocus}
+            onQuestionMark={this.showKeyboardShortcutsPanel}
+            onClose={onClose}
             phrases={phrases}
             screenReaderMessage={screenReaderInputMessage}
+            isFocused={isDateRangePickerInputFocused}
           />
 
           {this.maybeRenderDayPickerWithPortal()}

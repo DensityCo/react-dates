@@ -1,15 +1,20 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import shallowCompare from 'react-addons-shallow-compare';
 import momentPropTypes from 'react-moment-proptypes';
-import { forbidExtraProps } from 'airbnb-prop-types';
+import { forbidExtraProps, nonNegativeInteger } from 'airbnb-prop-types';
 import moment from 'moment';
 import cx from 'classnames';
 import { addEventListener, removeEventListener } from 'consolidated-events';
+
+import { CalendarDayPhrases } from '../defaultPhrases';
+import getPhrasePropTypes from '../utils/getPhrasePropTypes';
 
 import CalendarMonth from './CalendarMonth';
 
 import isTransitionEndSupported from '../utils/isTransitionEndSupported';
 import getTransformStyles from '../utils/getTransformStyles';
+import getCalendarMonthWidth from '../utils/getCalendarMonthWidth';
 
 import ScrollableOrientationShape from '../shapes/ScrollableOrientationShape';
 
@@ -17,6 +22,7 @@ import {
   HORIZONTAL_ORIENTATION,
   VERTICAL_ORIENTATION,
   VERTICAL_SCROLLABLE,
+  DAY_SIZE,
 } from '../../constants';
 
 const propTypes = forbidExtraProps({
@@ -33,9 +39,13 @@ const propTypes = forbidExtraProps({
   onMonthTransitionEnd: PropTypes.func,
   renderDay: PropTypes.func,
   transformValue: PropTypes.string,
+  daySize: nonNegativeInteger,
+  focusedDate: momentPropTypes.momentObj, // indicates focusable day
+  isFocused: PropTypes.bool, // indicates whether or not to move focus to focusable day
 
   // i18n
   monthFormat: PropTypes.string,
+  phrases: PropTypes.shape(getPhrasePropTypes(CalendarDayPhrases)),
 });
 
 const defaultProps = {
@@ -52,9 +62,13 @@ const defaultProps = {
   onMonthTransitionEnd() {},
   renderDay: null,
   transformValue: 'none',
+  daySize: DAY_SIZE,
+  focusedDate: null,
+  isFocused: false,
 
   // i18n
   monthFormat: 'MMMM YYYY', // english locale
+  phrases: CalendarDayPhrases,
 };
 
 function getMonths(initialMonth, numberOfMonths) {
@@ -147,28 +161,45 @@ export default class CalendarMonthGrid extends React.Component {
       monthFormat,
       orientation,
       transformValue,
+      daySize,
       onDayMouseEnter,
       onDayMouseLeave,
       onDayClick,
       renderDay,
       onMonthTransitionEnd,
+      focusedDate,
+      isFocused,
+      phrases,
     } = this.props;
 
-
     const { months } = this.state;
+    const isVertical = orientation === VERTICAL_ORIENTATION;
+    const isVerticalScrollable = orientation === VERTICAL_SCROLLABLE;
+    const isHorizontal = orientation === HORIZONTAL_ORIENTATION;
 
     const className = cx('CalendarMonthGrid', {
-      'CalendarMonthGrid--horizontal': orientation === HORIZONTAL_ORIENTATION,
-      'CalendarMonthGrid--vertical': orientation === VERTICAL_ORIENTATION,
-      'CalendarMonthGrid--vertical-scrollable': orientation === VERTICAL_SCROLLABLE,
+      'CalendarMonthGrid--horizontal': isHorizontal,
+      'CalendarMonthGrid--vertical': isVertical,
+      'CalendarMonthGrid--vertical-scrollable': isVerticalScrollable,
       'CalendarMonthGrid--animating': isAnimating,
     });
+
+    const calendarMonthWidth = getCalendarMonthWidth(daySize);
+
+    const width = isVertical || isVerticalScrollable ?
+      calendarMonthWidth :
+      (numberOfMonths + 2) * calendarMonthWidth;
+
+    const style = {
+      ...getTransformStyles(transformValue),
+      width,
+    };
 
     return (
       <div
         ref={(ref) => { this.container = ref; }}
         className={className}
-        style={getTransformStyles(transformValue)}
+        style={style}
         onTransitionEnd={onMonthTransitionEnd}
       >
         {months.map((month, i) => {
@@ -187,6 +218,10 @@ export default class CalendarMonthGrid extends React.Component {
               onDayMouseLeave={onDayMouseLeave}
               onDayClick={onDayClick}
               renderDay={renderDay}
+              daySize={daySize}
+              focusedDate={isVisible ? focusedDate : null}
+              isFocused={isFocused}
+              phrases={phrases}
             />
           );
         })}

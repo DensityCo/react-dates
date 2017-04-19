@@ -1,5 +1,6 @@
-import { PropTypes } from 'react';
+import PropTypes from 'prop-types';
 import momentPropTypes from 'react-moment-proptypes';
+import { nonNegativeInteger } from 'airbnb-prop-types';
 
 import { DateRangePickerPhrases } from '../defaultPhrases';
 import getPhrasePropTypes from '../utils/getPhrasePropTypes';
@@ -16,6 +17,8 @@ export default {
 
   focusedInput: FocusedInputShape,
   onFocusChange: PropTypes.func.isRequired,
+
+  onClose: PropTypes.func,
 
   // input related props
   startDateId: PropTypes.string.isRequired,
@@ -37,6 +40,8 @@ export default {
   horizontalMargin: PropTypes.number,
   withPortal: PropTypes.bool,
   withFullScreenPortal: PropTypes.bool,
+  daySize: nonNegativeInteger,
+
   initialVisibleMonth: PropTypes.func,
   numberOfMonths: PropTypes.number,
   keepOpenOnDateSelect: PropTypes.bool,
