@@ -1,5 +1,26 @@
 # Change Log
 
+## v10.1.1
+- [fix] Remove unnecessary `onClose` instances on the `SDPInput` and `DateInput` components
+
+## v10.1.0
+- [new] Adds `onClose` callback ([#397](https://github.com/airbnb/react-dates/pull/397))
+
+## v10.0.1
+- [fix] Fix a few nits as a result of the accessibility PR ([#429](https://github.com/airbnb/react-dates/pull/429))
+
+## v10.0.0
+- [breaking] Added keyboard accessibility to react-dates ([#301](https://github.com/airbnb/react-dates/pull/301))
+
+## v9.0.1
+- [fix] Fixes `withPortal` implementation in Firefox ([#421](https://github.com/airbnb/react-dates/pull/421))
+
+## v9.0.0
+- [fix] Only send down relevant modifiers down the tree ([#412](https://github.com/airbnb/react-dates/pull/412))
+- [fix] Optimise `isSameDay` method ([#415](https://github.com/airbnb/react-dates/pull/415))
+- [fix] Blur input for portal implementations (and on touch devices) ([#410](https://github.com/airbnb/react-dates/pull/410))
+- [breaking] Add `daySize` prop to scale the pickers properly ([#406](https://github.com/airbnb/react-dates/pull/406))
+
 ## v8.2.1
 - [fix] Add `needsclick` to inputs to disable fastclick ([#377](https://github.com/airbnb/react-dates/pull/377))
 - [deps] Update `style-loader`, `sinon`, `babel-loader`, `coveralls`, and `karma-webpack` ([#379](https://github.com/airbnb/react-dates/pull/379), [#372](https://github.com/airbnb/react-dates/pull/372), [#373](https://github.com/airbnb/react-dates/pull/373))

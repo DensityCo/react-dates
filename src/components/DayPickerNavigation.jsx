@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { forbidExtraProps } from 'airbnb-prop-types';
 import cx from 'classnames';
 
@@ -80,23 +81,32 @@ export default function DayPickerNavigation(props) {
 
   return (
     <div className={navClassNames}>
+
       {!isVerticalScrollable && (
-        <span
+        <button
+          type="button"
           aria-label={phrases.jumpToPrevMonth}
           className={prevClassNames}
           onClick={onPrevMonthClick}
+          onMouseUp={(e) => {
+            e.currentTarget.blur();
+          }}
         >
           {navPrevIcon}
-        </span>
+        </button>
       )}
 
-      <span
+      <button
+        type="button"
         aria-label={phrases.jumpToNextMonth}
         className={nextClassNames}
         onClick={onNextMonthClick}
+        onMouseUp={(e) => {
+          e.currentTarget.blur();
+        }}
       >
         {navNextIcon}
-      </span>
+      </button>
     </div>
   );
 }
