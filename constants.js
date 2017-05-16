@@ -11,4 +11,7 @@ module.exports = {
 
   ANCHOR_LEFT: 'left',
   ANCHOR_RIGHT: 'right',
+
+  DAY_SIZE: 39,
+  BLOCKED_MODIFIER: 'blocked',
 };

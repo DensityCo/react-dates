@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import moment from 'moment';
 
 import momentPropTypes from 'react-moment-proptypes';
@@ -43,11 +44,17 @@ const propTypes = forbidExtraProps({
   displayFormat: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
 
   onFocusChange: PropTypes.func,
+  onClose: PropTypes.func,
   onDatesChange: PropTypes.func,
+  onArrowDown: PropTypes.func,
+  onQuestionMark: PropTypes.func,
 
   customInputIcon: PropTypes.node,
   customArrowIcon: PropTypes.node,
   customCloseIcon: PropTypes.node,
+
+  // accessibility
+  isFocused: PropTypes.bool,
 
   // i18n
   phrases: PropTypes.shape(getPhrasePropTypes(DateRangePickerInputPhrases)),
@@ -78,17 +85,23 @@ const defaultProps = {
   displayFormat: () => moment.localeData().longDateFormat('L'),
 
   onFocusChange() {},
+  onClose() {},
   onDatesChange() {},
+  onArrowDown() {},
+  onQuestionMark() {},
 
   customInputIcon: null,
   customArrowIcon: null,
   customCloseIcon: null,
 
+  // accessibility
+  isFocused: false,
+
   // i18n
   phrases: DateRangePickerInputPhrases,
 };
 
-export default class DateRangePickerInputWithHandlers extends React.Component {
+export default class DateRangePickerInputController extends React.Component {
   constructor(props) {
     super(props);
 
@@ -101,7 +114,10 @@ export default class DateRangePickerInputWithHandlers extends React.Component {
   }
 
   onClearFocus() {
-    this.props.onFocusChange(null);
+    const { onFocusChange, onClose, startDate, endDate } = this.props;
+
+    onFocusChange(null);
+    onClose({ startDate, endDate });
   }
 
   onEndDateChange(endDateString) {
@@ -110,7 +126,6 @@ export default class DateRangePickerInputWithHandlers extends React.Component {
       isOutsideRange,
       keepOpenOnDateSelect,
       onDatesChange,
-      onFocusChange,
     } = this.props;
 
     const endDate = toMomentObject(endDateString, this.getDisplayFormat());
@@ -119,7 +134,7 @@ export default class DateRangePickerInputWithHandlers extends React.Component {
       !isInclusivelyBeforeDay(endDate, startDate);
     if (isEndDateValid) {
       onDatesChange({ startDate, endDate });
-      if (!keepOpenOnDateSelect) onFocusChange(null);
+      if (!keepOpenOnDateSelect) this.onClearFocus();
     } else {
       onDatesChange({
         startDate,
@@ -208,7 +223,10 @@ export default class DateRangePickerInputWithHandlers extends React.Component {
       customCloseIcon,
       disabled,
       required,
+      isFocused,
       phrases,
+      onArrowDown,
+      onQuestionMark,
     } = this.props;
 
     const startDateString = this.getDateString(startDate);
@@ -228,6 +246,7 @@ export default class DateRangePickerInputWithHandlers extends React.Component {
         endDateId={endDateId}
         endDatePlaceholderText={endDatePlaceholderText}
         isEndDateFocused={isEndDateFocused}
+        isFocused={isFocused}
         disabled={disabled}
         required={required}
         showCaret={showCaret}
@@ -245,10 +264,12 @@ export default class DateRangePickerInputWithHandlers extends React.Component {
         showClearDates={showClearDates}
         onClearDates={this.clearDates}
         screenReaderMessage={screenReaderMessage}
+        onArrowDown={onArrowDown}
+        onQuestionMark={onQuestionMark}
       />
     );
   }
 }
 
-DateRangePickerInputWithHandlers.propTypes = propTypes;
-DateRangePickerInputWithHandlers.defaultProps = defaultProps;
+DateRangePickerInputController.propTypes = propTypes;
+DateRangePickerInputController.defaultProps = defaultProps;

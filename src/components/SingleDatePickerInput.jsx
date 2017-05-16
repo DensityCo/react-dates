@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { forbidExtraProps } from 'airbnb-prop-types';
 import cx from 'classnames';
 
@@ -15,6 +16,7 @@ const propTypes = forbidExtraProps({
   inputValue: PropTypes.string,
   screenReaderMessage: PropTypes.string,
   focused: PropTypes.bool,
+  isFocused: PropTypes.bool, // describes actual DOM focus
   disabled: PropTypes.bool,
   required: PropTypes.bool,
   showCaret: PropTypes.bool,
@@ -26,6 +28,7 @@ const propTypes = forbidExtraProps({
   onFocus: PropTypes.func,
   onKeyDownShiftTab: PropTypes.func,
   onKeyDownTab: PropTypes.func,
+  onKeyDownArrowDown: PropTypes.func,
 
   // i18n
   phrases: PropTypes.shape(getPhrasePropTypes(SingleDatePickerInputPhrases)),
@@ -37,6 +40,7 @@ const defaultProps = {
   inputValue: '',
   screenReaderMessage: '',
   focused: false,
+  isFocused: false,
   disabled: false,
   required: false,
   showCaret: false,
@@ -48,6 +52,7 @@ const defaultProps = {
   onFocus() {},
   onKeyDownShiftTab() {},
   onKeyDownTab() {},
+  onKeyDownArrowDown() {},
 
   // i18n
   phrases: SingleDatePickerInputPhrases,
@@ -84,6 +89,7 @@ export default class SingleDatePickerInput extends React.Component {
       displayValue,
       inputValue,
       focused,
+      isFocused,
       disabled,
       required,
       showCaret,
@@ -94,11 +100,13 @@ export default class SingleDatePickerInput extends React.Component {
       onFocus,
       onKeyDownShiftTab,
       onKeyDownTab,
+      onKeyDownArrowDown,
       screenReaderMessage,
       customCloseIcon,
     } = this.props;
 
     const closeIcon = customCloseIcon || (<CloseButton />);
+    const screenReaderText = screenReaderMessage || phrases.keyboardNavigationInstructions;
 
     return (
       <div className="SingleDatePickerInput">
@@ -107,16 +115,17 @@ export default class SingleDatePickerInput extends React.Component {
           placeholder={placeholder} // also used as label
           displayValue={displayValue}
           inputValue={inputValue}
-          screenReaderMessage={screenReaderMessage}
+          screenReaderMessage={screenReaderText}
           focused={focused}
+          isFocused={isFocused}
           disabled={disabled}
           required={required}
           showCaret={showCaret}
-
           onChange={onChange}
           onFocus={onFocus}
           onKeyDownShiftTab={onKeyDownShiftTab}
           onKeyDownTab={onKeyDownTab}
+          onKeyDownArrowDown={onKeyDownArrowDown}
         />
 
         {showClearDate && (
