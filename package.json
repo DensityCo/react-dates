@@ -1,5 +1,5 @@
 {
-  "name": "@density/react-dates",
+  "name": "@density-int/react-dates",
   "version": "8.2.1",
   "description": "A responsive and accessible date range picker component built with React",
   "main": "index.js",
