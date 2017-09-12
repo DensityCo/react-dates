@@ -1,5 +1,5 @@
 {
-  "name": "@density-int/react-dates",
+  "name": "@density/react-dates",
   "version": "12.6.0",
   "description": "A responsive and accessible date range picker component built with React",
   "main": "index.js",
@@ -116,9 +116,6 @@
     "react": ">=0.14",
     "react-dom": ">=0.14",
     "react-addons-shallow-compare": ">=0.14"
-  },
-  "publishConfig": {
-    "registry": "http://npmregistry.density.rodeo"
   },
   "greenkeeper": {
     "ignore": [
