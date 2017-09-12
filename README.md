@@ -24,7 +24,7 @@ To run that demo on your own computer:
 * Clone this repository
 * `npm install`
 * `npm run storybook`
-* Visit http://localhost:9001/
+* Visit http://localhost:6006/
 
 ## Getting Started
 ### Install dependencies
@@ -89,6 +89,7 @@ endDateId: PropTypes.string.isRequired,
 endDatePlaceholderText: PropTypes.string,
 disabled: PropTypes.bool,
 required: PropTypes.bool,
+readOnly: PropTypes.bool,
 screenReaderInputMessage: PropTypes.string,
 showClearDates: PropTypes.bool,
 showDefaultInputIcon: PropTypes.bool,
@@ -97,16 +98,21 @@ customArrowIcon: PropTypes.node,
 customCloseIcon: PropTypes.node,
 
 // calendar presentation and interaction related props
+renderMonth: PropTypes.func,
 orientation: OrientationShape,
 anchorDirection: anchorDirectionShape,
 horizontalMargin: PropTypes.number,
 withPortal: PropTypes.bool,
 withFullScreenPortal: PropTypes.bool,
+daySize: nonNegativeInteger,
+isRTL: PropTypes.bool,
 initialVisibleMonth: PropTypes.func,
+firstDayOfWeek: PropTypes.oneOf([0, 1, 2, 3, 4, 5, 6]),
 numberOfMonths: PropTypes.number,
 keepOpenOnDateSelect: PropTypes.bool,
 reopenPickerOnClearDates: PropTypes.bool,
 renderCalendarInfo: PropTypes.func,
+hideKeyboardShortcutsPanel: PropTypes.bool,
 
 // navigation related props
 navPrev: PropTypes.node,
@@ -126,6 +132,7 @@ isDayHighlighted: PropTypes.func,
 // internationalization props
 displayFormat: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
 monthFormat: PropTypes.string,
+weekDayFormat: PropTypes.string,
 phrases: PropTypes.shape(getPhrasePropTypes(DateRangePickerPhrases)),
 ```
 
@@ -153,21 +160,29 @@ id: PropTypes.string.isRequired,
 placeholder: PropTypes.string,
 disabled: PropTypes.bool,
 required: PropTypes.bool,
+readOnly: PropTypes.bool,
 screenReaderInputMessage: PropTypes.string,
 showClearDate: PropTypes.bool,
 customCloseIcon: PropTypes.node,
+showDefaultInputIcon: PropTypes.bool,
+customInputIcon: PropTypes.node,
 
 // calendar presentation and interaction related props
+renderMonth: PropTypes.func,
 orientation: OrientationShape,
 anchorDirection: anchorDirectionShape,
 horizontalMargin: PropTypes.number,
 withPortal: PropTypes.bool,
 withFullScreenPortal: PropTypes.bool,
 initialVisibleMonth: PropTypes.func,
+firstDayOfWeek: PropTypes.oneOf([0, 1, 2, 3, 4, 5, 6]),
 numberOfMonths: PropTypes.number,
 keepOpenOnDateSelect: PropTypes.bool,
 reopenPickerOnClearDate: PropTypes.bool,
 renderCalendarInfo: PropTypes.func,
+hideKeyboardShortcutsPanel: PropTypes.bool,
+daySize: nonNegativeInteger,
+isRTL: PropTypes.bool,
 
 // navigation related props
 navPrev: PropTypes.node,
@@ -186,6 +201,7 @@ isDayHighlighted: PropTypes.func,
 // internationalization props
 displayFormat: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
 monthFormat: PropTypes.string,
+weekDayFormat: PropTypes.string,
 phrases: PropTypes.shape(getPhrasePropTypes(SingleDatePickerPhrases)),
 ```
 
@@ -232,8 +248,16 @@ The following is a list of other *OPTIONAL* props you may provide to the `DayPic
 
   // internationalization props
   monthFormat: PropTypes.string,
+  weekDayFormat: PropTypes.string,
   phrases: PropTypes.shape(getPhrasePropTypes(DayPickerPhrases)),
 />
+```
+
+## Localization
+
+[Moment.js](http://momentjs.com) is a peer dependency of `react-dates`, so `react-dates` will use a single instance of `moment` which is imported in the user's project. To load a locale it is enough to invoke `moment.locale` in the component where `moment` is imported, with the [locale key](http://momentjs.com/docs/#/i18n/) of choice, e.g.:
+```
+moment.locale('pl'); // Polish
 ```
 
 ## Theming
@@ -242,7 +266,7 @@ react-dates comes with a set of SCSS variables that can be overridden to add you
 ```scss
 //overriding default sass variables with my project's colors
 $react-dates-color-primary: $some-color-specific-to-my-project;
-$react-dates-color-primary-dark: $some-other-color-specific-to-my-project;
+$react-dates-color-secondary: $some-other-color-specific-to-my-project;
 @import '~react-dates/css/variables.scss';
 @import '~react-dates/css/styles.scss';
 ```

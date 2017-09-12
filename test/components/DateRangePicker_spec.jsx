@@ -16,6 +16,8 @@ import {
   START_DATE,
   ANCHOR_LEFT,
   ANCHOR_RIGHT,
+  OPEN_DOWN,
+  OPEN_UP,
 } from '../../constants';
 
 describe('DateRangePicker', () => {
@@ -28,6 +30,11 @@ describe('DateRangePicker', () => {
     it('renders .DateRangePicker__picker class', () => {
       const wrapper = shallow(<DateRangePicker focusedInput={START_DATE} />);
       expect(wrapper.find('.DateRangePicker__picker')).to.have.length(1);
+    });
+
+    it('renders .DateRangePicker__picker--rtl class', () => {
+      const wrapper = shallow(<DateRangePicker focusedInput={START_DATE} isRTL />);
+      expect(wrapper.find('.DateRangePicker__picker--rtl')).to.have.length(1);
     });
 
     it('renders <DateRangePickerInputWithHandlers />', () => {
@@ -74,12 +81,30 @@ describe('DateRangePicker', () => {
       });
     });
 
-    describe('props.orientation === ANCHOR_RIGHT', () => {
+    describe('props.anchorDirection === ANCHOR_RIGHT', () => {
       it('renders .DateRangePicker__picker--direction-right class', () => {
         const wrapper = shallow(
           <DateRangePicker anchorDirection={ANCHOR_RIGHT} focusedInput={START_DATE} />,
         );
         expect(wrapper.find('.DateRangePicker__picker--direction-right')).to.have.length(1);
+      });
+    });
+
+    describe('props.openDirection === OPEN_DOWN', () => {
+      it('renders .DateRangePicker__picker--open-down class', () => {
+        const wrapper = shallow(
+          <DateRangePicker openDirection={OPEN_DOWN} focusedInput={START_DATE} />,
+        );
+        expect(wrapper.find('.DateRangePicker__picker--open-down')).to.have.length(1);
+      });
+    });
+
+    describe('props.openDirection === OPEN_UP', () => {
+      it('renders .DateRangePicker__picker--open-up class', () => {
+        const wrapper = shallow(
+          <DateRangePicker openDirection={OPEN_UP} focusedInput={START_DATE} />,
+        );
+        expect(wrapper.find('.DateRangePicker__picker--open-up')).to.have.length(1);
       });
     });
 

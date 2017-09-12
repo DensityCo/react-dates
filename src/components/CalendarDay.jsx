@@ -16,7 +16,7 @@ const propTypes = forbidExtraProps({
   day: momentPropTypes.momentObj,
   daySize: nonNegativeInteger,
   isOutsideDay: PropTypes.bool,
-  modifiers: PropTypes.object,
+  modifiers: PropTypes.instanceOf(Set),
   isFocused: PropTypes.bool,
   tabIndex: PropTypes.oneOf([0, -1]),
   onDayClick: PropTypes.func,
@@ -32,7 +32,7 @@ const defaultProps = {
   day: moment(),
   daySize: DAY_SIZE,
   isOutsideDay: false,
-  modifiers: {},
+  modifiers: new Set(),
   isFocused: false,
   tabIndex: -1,
   onDayClick() {},
@@ -44,11 +44,13 @@ const defaultProps = {
   phrases: CalendarDayPhrases,
 };
 
-export function getModifiersForDay(modifiers, day) {
-  return day ? Object.keys(modifiers).filter(key => modifiers[key](day)) : [];
-}
-
 export default class CalendarDay extends React.Component {
+  constructor(...args) {
+    super(...args);
+
+    this.setButtonRef = this.setButtonRef.bind(this);
+  }
+
   shouldComponentUpdate(nextProps, nextState) {
     return shallowCompare(this, nextProps, nextState);
   }
@@ -77,6 +79,10 @@ export default class CalendarDay extends React.Component {
     onDayMouseLeave(day, e);
   }
 
+  setButtonRef(ref) {
+    this.buttonRef = ref;
+  }
+
   render() {
     const {
       day,
@@ -93,12 +99,9 @@ export default class CalendarDay extends React.Component {
 
     if (!day) return <td />;
 
-    const modifiersForDay = getModifiersForDay(modifiers, day);
-
     const className = cx('CalendarDay', {
       'CalendarDay--outside': isOutsideDay,
-    }, modifiersForDay.map(mod => `CalendarDay--${mod}`));
-
+    }, Array.from(modifiers, mod => `CalendarDay--${mod}`));
 
     const formattedDate = `${day.format('dddd')}, ${day.format('LL')}`;
 
@@ -119,7 +122,7 @@ export default class CalendarDay extends React.Component {
       <td className={className} style={daySizeStyles}>
         <button
           type="button"
-          ref={(ref) => { this.buttonRef = ref; }}
+          ref={this.setButtonRef}
           className="CalendarDay__button"
           aria-label={ariaLabel}
           onMouseEnter={(e) => { this.onDayMouseEnter(day, e); }}

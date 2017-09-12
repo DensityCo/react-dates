@@ -3,6 +3,8 @@ import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
 
+import { OPEN_DOWN, OPEN_UP } from '../../constants';
+
 import DateInput from '../../src/components/DateInput';
 
 const event = { preventDefault() {}, stopPropagation() {} };
@@ -25,6 +27,20 @@ describe('DateInput', () => {
       it('has .DateInput--disabled class', () => {
         const wrapper = shallow(<DateInput id="date" disabled />);
         expect(wrapper.find('.DateInput--disabled')).to.have.lengthOf(1);
+      });
+    });
+
+    describe('props.openDirection === OPEN_DOWN', () => {
+      it('renders .DateInput--open-down class', () => {
+        const wrapper = shallow(<DateInput id="date" openDirection={OPEN_DOWN} />);
+        expect(wrapper.find('.DateInput--open-down')).to.have.lengthOf(1);
+      });
+    });
+
+    describe('props.openDirection === OPEN_UP', () => {
+      it('renders .DateInput--open-up class', () => {
+        const wrapper = shallow(<DateInput id="date" openDirection={OPEN_UP} />);
+        expect(wrapper.find('.DateInput--open-up')).to.have.lengthOf(1);
       });
     });
 
@@ -62,6 +78,20 @@ describe('DateInput', () => {
           expect(wrapper.find('input').props().value).to.equal(DATE_STRING);
         },
       );
+
+      describe('props.readOnly is truthy', () => {
+        it('sets readOnly', () => {
+          const wrapper = shallow(<DateInput id="date" readOnly />);
+          expect(!!wrapper.find('input').prop('readOnly')).to.equal(true);
+        });
+      });
+
+      describe('props.readOnly is falsey', () => {
+        it('does not set readOnly', () => {
+          const wrapper = shallow(<DateInput id="date" readOnly={false} />);
+          expect(!!wrapper.find('input').prop('readOnly')).to.equal(false);
+        });
+      });
     });
 
     describe('screen reader message', () => {
@@ -259,16 +289,18 @@ describe('DateInput', () => {
       expect(wrapper.state()).to.contain.keys({ isTouchDevice: false });
     });
 
-    it('does not set readOnly when not a touch device', () => {
-      const wrapper = shallow(<DateInput id="date" />);
-      expect(!!wrapper.find('input').prop('readOnly')).to.equal(false);
-    });
-
-    it('sets readOnly when a touch device', () => {
+    it('sets readOnly to true when no value was provided on a touch device', () => {
       const wrapper = shallow(<DateInput id="date" />);
       wrapper.setState({ isTouchDevice: true });
       wrapper.update();
       expect(!!wrapper.find('input').prop('readOnly')).to.equal(true);
+    });
+
+    it('sets readOnly to provided value on a touch device', () => {
+      const wrapper = shallow(<DateInput id="date" readOnly={false} />);
+      wrapper.setState({ isTouchDevice: true });
+      wrapper.update();
+      expect(!!wrapper.find('input').prop('readOnly')).to.equal(false);
     });
 
     describe('focus/isFocused', () => {
