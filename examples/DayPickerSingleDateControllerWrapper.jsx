@@ -10,7 +10,7 @@ import DayPickerSingleDateController from '../src/components/DayPickerSingleDate
 
 import ScrollableOrientationShape from '../src/shapes/ScrollableOrientationShape';
 
-import { HORIZONTAL_ORIENTATION } from '../constants';
+import { HORIZONTAL_ORIENTATION } from '../src/constants';
 import isInclusivelyAfterDay from '../src/utils/isInclusivelyAfterDay';
 
 const propTypes = forbidExtraProps({
@@ -34,11 +34,14 @@ const propTypes = forbidExtraProps({
 
   navPrev: PropTypes.node,
   navNext: PropTypes.node,
+  renderNavPrevButton: PropTypes.func,
+  renderNavNextButton: PropTypes.func,
 
   onPrevMonthClick: PropTypes.func,
   onNextMonthClick: PropTypes.func,
   onOutsideClick: PropTypes.func,
-  renderDay: PropTypes.func,
+  renderCalendarDay: PropTypes.func,
+  renderDayContents: PropTypes.func,
 
   // i18n
   monthFormat: PropTypes.string,
@@ -53,7 +56,8 @@ const defaultProps = {
   showInput: false,
 
   // day presentation and interaction related props
-  renderDay: null,
+  renderCalendarDay: undefined,
+  renderDayContents: null,
   isDayBlocked: () => false,
   isOutsideRange: day => !isInclusivelyAfterDay(day, moment()),
   isDayHighlighted: () => false,
@@ -72,6 +76,8 @@ const defaultProps = {
   // navigation related props
   navPrev: null,
   navNext: null,
+  renderNavPrevButton: null,
+  renderNavNextButton: null,
   onPrevMonthClick() {},
   onNextMonthClick() {},
 
@@ -115,11 +121,11 @@ class DayPickerSingleDateControllerWrapper extends React.Component {
 
     return (
       <div>
-        {showInput &&
+        {showInput && (
           <div style={{ marginBottom: 16 }}>
             <input type="text" name="start date" value={dateString || ''} readOnly />
           </div>
-        }
+        )}
 
         <DayPickerSingleDateController
           {...props}

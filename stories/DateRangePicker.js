@@ -2,6 +2,13 @@ import React from 'react';
 import moment from 'moment';
 import momentJalaali from 'moment-jalaali';
 import { storiesOf } from '@storybook/react';
+import { withInfo } from '@storybook/addon-info';
+import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
+
+import {
+  VERTICAL_ORIENTATION,
+  ANCHOR_RIGHT,
+} from '../src/constants';
 
 import DateRangePickerWrapper from '../examples/DateRangePickerWrapper';
 
@@ -50,21 +57,21 @@ class TestWrapper extends React.Component {
 }
 
 storiesOf('DateRangePicker (DRP)', module)
-  .addWithInfo('default', () => (
+  .add('default', withInfo()(() => (
     <DateRangePickerWrapper />
-  ))
-  .addWithInfo('hidden with display: none', () => (
+  )))
+  .add('hidden with display: none', withInfo()(() => (
     <TestWrapper />
-  ))
-  .addWithInfo('as part of a form', () => (
+  )))
+  .add('as part of a form', withInfo()(() => (
     <div>
       <DateRangePickerWrapper />
       <TestInput placeholder="Input 1" />
       <TestInput placeholder="Input 2" />
       <TestInput placeholder="Input 3" />
     </div>
-  ))
-  .addWithInfo('non-english locale', () => {
+  )))
+  .add('non-english locale', withInfo()(() => {
     moment.locale('zh-cn');
     return (
       <DateRangePickerWrapper
@@ -78,14 +85,43 @@ storiesOf('DateRangePicker (DRP)', module)
         }}
       />
     );
-  })
-  .addWithInfo('non-english locale (Persian)', () => {
+  }))
+  .add('non-english locale (Persian)', withInfo()(() => {
     moment.locale('fa');
+    momentJalaali.loadPersian({ dialect: 'persian-modern', usePersianDigits: true });
     return (
       <DateRangePickerWrapper
-        placeholder="تقویم فارسی"
-        renderMonth={month => momentJalaali(month).format('jMMMM jYYYY')}
-        renderDay={day => momentJalaali(day).format('jD')}
+        isRTL
+        stateDateWrapper={momentJalaali}
+        startDatePlaceholderText="تاریخ شروع"
+        endDatePlaceholderText="تاریخ پایان"
+        renderMonthText={month => momentJalaali(month).format('jMMMM jYYYY')}
+        renderDayContents={day => momentJalaali(day).format('jD')}
       />
     );
-  });
+  }))
+  .add('with DirectionProvider', withInfo()(() => (
+    <DirectionProvider direction={DIRECTIONS.RTL}>
+      <DateRangePickerWrapper
+        startDatePlaceholderText="تاریخ شروع"
+        endDatePlaceholderText="تاریخ پایان"
+        anchorDirection={ANCHOR_RIGHT}
+        showDefaultInputIcon
+        showClearDates
+        isRTL
+      />
+    </DirectionProvider>
+  )))
+  .add('vertical with custom height', withInfo()(() => (
+    <DateRangePickerWrapper
+      orientation={VERTICAL_ORIENTATION}
+      verticalHeight={568}
+    />
+  )))
+  .add('with navigation blocked (minDate and maxDate)', withInfo()(() => (
+    <DateRangePickerWrapper
+      minDate={moment().subtract(2, 'months').startOf('month')}
+      maxDate={moment().add(2, 'months').endOf('month')}
+      numberOfMonths={2}
+    />
+  )));

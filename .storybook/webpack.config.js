@@ -1,36 +1,35 @@
 const path = require('path');
 
-module.exports = {
-  module: {
-    rules: [
-      {
-        test: /\.scss$/,
-        use: ['style-loader', 'raw-loader', 'sass-loader'],
-        include: [
-          path.resolve(__dirname, './'),
-          path.resolve(__dirname, '../css/'),
-        ],
-      },
-      {
-        test: /\.svg$/,
-        use: [
-          {
-            loader: 'babel-loader',
-            query: {
-              presets: ['airbnb'],
-            },
+module.exports = ({ config }) => {
+  config.module.rules.push(
+    {
+      test: /\.s?css$/,
+      use: ['style-loader', 'raw-loader', 'sass-loader'],
+      include: [path.resolve(__dirname, '../css/')],
+    },
+    {
+      test: /\.svg$/,
+      use: [
+        {
+          loader: 'babel-loader',
+          query: {
+            presets: ['airbnb'],
           },
-          {
-            loader: 'react-svg-loader',
-            query: {
-              jsx: true,
-            },
+        },
+      ],
+    },
+    {
+      test: /\.jsx$/,
+      use: [
+        {
+          loader: 'babel-loader',
+          query: {
+            presets: ['airbnb'],
           },
-        ],
-      },
-    ],
-  },
-  resolve: {
-    extensions: ['.js', '.jsx'],
-  },
+        },
+      ],
+    },
+  );
+  config.resolve.extensions = ['.js', '.jsx'];
+  return config;
 };

@@ -2,6 +2,13 @@ import React from 'react';
 import moment from 'moment';
 import momentJalaali from 'moment-jalaali';
 import { storiesOf } from '@storybook/react';
+import { withInfo } from '@storybook/addon-info';
+import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
+
+import {
+  VERTICAL_ORIENTATION,
+  ANCHOR_RIGHT,
+} from '../src/constants';
 
 import SingleDatePickerWrapper from '../examples/SingleDatePickerWrapper';
 
@@ -22,18 +29,18 @@ const TestInput = props => (
 );
 
 storiesOf('SingleDatePicker (SDP)', module)
-  .addWithInfo('default', () => (
+  .add('default', withInfo()(() => (
     <SingleDatePickerWrapper />
-  ))
-  .addWithInfo('as part of a form', () => (
+  )))
+  .add('as part of a form', withInfo()(() => (
     <div>
       <SingleDatePickerWrapper />
       <TestInput placeholder="Input 1" />
       <TestInput placeholder="Input 2" />
       <TestInput placeholder="Input 3" />
     </div>
-   ))
-  .addWithInfo('non-english locale (Chinese)', () => {
+   )))
+  .add('non-english locale (Chinese)', withInfo()(() => {
     moment.locale('zh-cn');
     return (
       <SingleDatePickerWrapper
@@ -45,14 +52,31 @@ storiesOf('SingleDatePicker (SDP)', module)
         }}
       />
     );
-  })
-  .addWithInfo('non-english locale (Persian)', () => {
+  }))
+  .add('non-english locale (Persian)', withInfo()(() => {
     moment.locale('fa');
     return (
       <SingleDatePickerWrapper
         placeholder="تقویم فارسی"
-        renderMonth={month => momentJalaali(month).format('jMMMM jYYYY')}
-        renderDay={day => momentJalaali(day).format('jD')}
+        renderMonthText={month => momentJalaali(month).format('jMMMM jYYYY')}
+        renderDayContents={day => momentJalaali(day).format('jD')}
       />
     );
-  });
+  }))
+  .add('with DirectionProvider', withInfo()(() => (
+    <DirectionProvider direction={DIRECTIONS.RTL}>
+      <SingleDatePickerWrapper
+        placeholder="تاریخ شروع"
+        anchorDirection={ANCHOR_RIGHT}
+        showDefaultInputIcon
+        showClearDate
+        isRTL
+      />
+    </DirectionProvider>
+  )))
+  .add('vertical with custom height', withInfo()(() => (
+    <SingleDatePickerWrapper
+      orientation={VERTICAL_ORIENTATION}
+      verticalHeight={568}
+    />
+  )));

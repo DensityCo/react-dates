@@ -2,7 +2,7 @@ import moment from 'moment';
 import { expect } from 'chai';
 
 import toISODateString from '../../src/utils/toISODateString';
-import { ISO_FORMAT } from '../../constants';
+import { ISO_FORMAT } from '../../src/constants';
 
 describe('toISODateString', () => {
   it('returns null for falsy argument', () => {
@@ -13,6 +13,12 @@ describe('toISODateString', () => {
     const testDate = moment('1991-07-13');
     const dateString = toISODateString(testDate);
     expect(dateString).to.equal('1991-07-13');
+  });
+
+  it('matches moment format behavior', () => {
+    const testDate = moment('1991-07-13');
+    const dateString = toISODateString(testDate);
+    expect(dateString).to.equal(testDate.format(ISO_FORMAT));
   });
 
   it('converts iso date string to ISO date string', () => {

@@ -4,112 +4,296 @@ import sinon from 'sinon-sandbox';
 import { shallow } from 'enzyme';
 
 import DayPickerNavigation from '../../src/components/DayPickerNavigation';
-import {
-  HORIZONTAL_ORIENTATION,
-  VERTICAL_ORIENTATION,
-  VERTICAL_SCROLLABLE,
-} from '../../constants';
+import RightArrow from '../../src/components/RightArrow';
+import LeftArrow from '../../src/components/LeftArrow';
+import { VERTICAL_ORIENTATION } from '../../src/constants';
 
 describe('DayPickerNavigation', () => {
   describe('#render', () => {
-    it('.DayPickerNavigation class exists', () => {
-      const wrapper = shallow(<DayPickerNavigation />);
-      expect(wrapper.find('.DayPickerNavigation')).to.have.lengthOf(1);
+    it('renders two role="button" divs', () => {
+      const wrapper = shallow(<DayPickerNavigation />).dive();
+      expect(wrapper.find('[role="button"]')).to.have.lengthOf(2);
     });
 
-    it('has .DayPickerNavigation--horizontal when not vertical', () => {
-      const wrapper = shallow(<DayPickerNavigation orientation={HORIZONTAL_ORIENTATION} />);
-      expect(wrapper.find('.DayPickerNavigation--horizontal')).to.have.lengthOf(1);
+    it('renders one button when showNavNextButton is false', () => {
+      const wrapper = shallow(<DayPickerNavigation showNavNextButton={false} />).dive();
+      expect(wrapper.find('[role="button"]')).to.have.lengthOf(1);
     });
 
-    it('has .DayPickerNavigation--vertical when vertical', () => {
-      const wrapper = shallow(<DayPickerNavigation orientation={VERTICAL_ORIENTATION} />);
-      expect(wrapper.find('.DayPickerNavigation--vertical')).to.have.lengthOf(1);
+    it('renders one button when showNavNextButton is false', () => {
+      const wrapper = shallow(<DayPickerNavigation showNavPrevButton={false} />).dive();
+      expect(wrapper.find('[role="button"]')).to.have.lengthOf(1);
     });
 
-    describe('prev month button', () => {
-      it('has .DayPickerNavigation__prev class', () => {
-        const wrapper = shallow(<DayPickerNavigation />);
-        expect(wrapper.find('.DayPickerNavigation__prev')).to.have.lengthOf(1);
-      });
-
-      it('has .DayPickerNavigation__prev--rtl class', () => {
-        const wrapper = shallow(<DayPickerNavigation isRTL />);
-        expect(wrapper.find('.DayPickerNavigation__prev--rtl')).to.have.lengthOf(1);
-      });
-
-      it('has .DayPickerNavigation__prev on custom icon', () => {
-        const wrapper = shallow(<DayPickerNavigation navPrev={<span>Prev</span>} />);
-        expect(wrapper.find('.DayPickerNavigation__prev')).to.have.lengthOf(1);
-      });
-
-      it('has .DayPickerNavigation__prev--default if no custom prev icon', () => {
-        const wrapper = shallow(<DayPickerNavigation />);
-        expect(wrapper.find('.DayPickerNavigation__prev--default')).to.have.lengthOf(1);
-      });
-
-      it('has no .DayPickerNavigation__prev--default if custom prev icon', () => {
-        const wrapper = shallow(<DayPickerNavigation navPrev={<span>Prev</span>} />);
-        expect(wrapper.find('.DayPickerNavigation__prev--default')).to.have.lengthOf(0);
-      });
-
-      it('hidden when vertically scrollable', () => {
-        const wrapper = shallow(<DayPickerNavigation orientation={VERTICAL_SCROLLABLE} />);
-        expect(wrapper.find('.DayPickerNavigation__prev')).to.have.lengthOf(0);
-      });
+    it('is null when showNavNextButton and showNavPrevButton are both false', () => {
+      const wrapper = shallow(
+        <DayPickerNavigation showNavPrevButton={false} showNavNextButton={false} />,
+      ).dive();
+      expect(wrapper.type()).to.equal(null);
     });
 
-    describe('next month button', () => {
-      it('.DayPickerNavigation__next class exists', () => {
-        const wrapper = shallow(<DayPickerNavigation />);
-        expect(wrapper.find('.DayPickerNavigation__next')).to.have.lengthOf(1);
-      });
+    it('tabindex is present when the default buttons are used', () => {
+      const wrapper = shallow(<DayPickerNavigation />).dive();
+      const prevMonthButton = wrapper.find('[role="button"]').at(0);
+      const nextMonthButton = wrapper.find('[role="button"]').at(1);
+      expect(prevMonthButton.prop('tabIndex')).to.equal('0');
+      expect(nextMonthButton.prop('tabIndex')).to.equal('0');
+    });
 
-      it('.DayPickerNavigation__next--rtl class exists', () => {
-        const wrapper = shallow(<DayPickerNavigation isRTL />);
-        expect(wrapper.find('.DayPickerNavigation__next--rtl')).to.have.lengthOf(1);
-      });
+    it('tabindex is not present when custom buttons are used', () => {
+      const wrapper = shallow(<DayPickerNavigation navNext={<div />} navPrev={<div />} />).dive();
+      const prevMonthButton = wrapper.find('[role="button"]').at(0);
+      const nextMonthButton = wrapper.find('[role="button"]').at(1);
+      expect(prevMonthButton.prop('tabIndex')).to.equal(undefined);
+      expect(nextMonthButton.prop('tabIndex')).to.equal(undefined);
+    });
 
-      it('has .DayPickerNavigation__next class on custom icon', () => {
-        const wrapper = shallow(<DayPickerNavigation navNext={<span>Next</span>} />);
-        expect(wrapper.find('.DayPickerNavigation__next')).to.have.lengthOf(1);
-      });
+    it('tabindex is present when custom buttons are used and provide a tabIndex', () => {
+      const wrapper = shallow(
+        <DayPickerNavigation
+          navNext={<div id="navNext" tabIndex="0" />} // eslint-disable-line jsx-a11y/no-noninteractive-tabindex
+          navPrev={<div id="navPrev" tabIndex="0" />} // eslint-disable-line jsx-a11y/no-noninteractive-tabindex
+        />,
+      ).dive();
+      const prevMonthButton = wrapper.find('#navPrev');
+      const nextMonthButton = wrapper.find('#navNext');
+      expect(prevMonthButton.prop('tabIndex')).to.equal('0');
+      expect(nextMonthButton.prop('tabIndex')).to.equal('0');
+    });
 
-      it('has .DayPickerNavigation__next--default if no custom prev icon', () => {
-        const wrapper = shallow(<DayPickerNavigation />);
-        expect(wrapper.find('.DayPickerNavigation__next--default')).to.have.lengthOf(1);
-      });
+    it('uses RightArrow as the default prev icon for RTL', () => {
+      const wrapper = shallow(<DayPickerNavigation isRTL />).dive();
+      expect(wrapper.childAt(0).find(RightArrow)).to.have.lengthOf(1);
+    });
 
-      it('has no .DayPickerNavigation__next--default if custom next icon', () => {
-        const wrapper = shallow(<DayPickerNavigation navNext={<span>Next</span>} />);
-        expect(wrapper.find('.DayPickerNavigation__next--default')).to.have.lengthOf(0);
+    it('uses LeftArrow as the default next icon for RTL', () => {
+      const wrapper = shallow(<DayPickerNavigation isRTL />).dive();
+      expect(wrapper.childAt(1).find(LeftArrow)).to.have.lengthOf(1);
+    });
+
+    it('calls renderNavPrevButton when custom prev button is used', () => {
+      const renderNavPrevButtonStub = sinon.stub().returns(<button type="button">Prev</button>);
+      const wrapper = shallow(
+        <DayPickerNavigation
+          renderNavPrevButton={renderNavPrevButtonStub}
+        />,
+      ).dive();
+      expect(wrapper.childAt(0).find('div[role="button"]')).to.have.lengthOf(0);
+      expect(renderNavPrevButtonStub).to.have.property('callCount', 1);
+    });
+
+    it('calls renderNavNextButton when custom next button is used', () => {
+      const renderNavNextButtonStub = sinon.stub().returns(<button type="button">Next</button>);
+      const wrapper = shallow(
+        <DayPickerNavigation
+          renderNavNextButton={renderNavNextButtonStub}
+        />,
+      ).dive();
+      expect(wrapper.childAt(1).find('div[role="button"]')).to.have.lengthOf(0);
+      expect(renderNavNextButtonStub).to.have.property('callCount', 1);
+    });
+
+    it('does not render default styles when custom navigation is used', () => {
+      const renderNavPrevButtonStub = sinon.stub().returns(<button type="button">Prev</button>);
+      const renderNavNextButtonStub = sinon.stub().returns(<button type="button">Next</button>);
+      const wrapper = shallow(
+        <DayPickerNavigation
+          renderNavNextButton={renderNavNextButtonStub}
+          renderNavPrevButton={renderNavPrevButtonStub}
+          orientation={VERTICAL_ORIENTATION}
+        />,
+      ).dive();
+      const wrapperDiv = wrapper.find('div').filterWhere((div) => {
+        const className = div.prop('className') || '';
+        return className.includes('DayPickerNavigation__verticalDefault');
       });
+      expect(wrapperDiv).to.have.lengthOf(0);
+    });
+
+    it('does render default styles when custom navigation is used for only one nav button', () => {
+      const renderNavPrevButtonStub = sinon.stub().returns(<button type="button">Prev</button>);
+      const wrapper = shallow(
+        <DayPickerNavigation
+          renderNavPrevButton={renderNavPrevButtonStub}
+          orientation={VERTICAL_ORIENTATION}
+        />,
+      ).dive();
+      const wrapperDiv = wrapper.find('div').filterWhere((div) => {
+        const className = div.prop('className') || '';
+        return className.includes('DayPickerNavigation__verticalDefault');
+      });
+      expect(wrapperDiv).to.have.lengthOf(1);
+    });
+
+    it('does not render default styles when custom navigation is used for only button but the other nav button is not shown', () => {
+      const renderNavPrevButtonStub = sinon.stub().returns(<button type="button">Prev</button>);
+      const wrapper = shallow(
+        <DayPickerNavigation
+          showNavNextButton={false}
+          renderNavPrevButton={renderNavPrevButtonStub}
+          orientation={VERTICAL_ORIENTATION}
+        />,
+      ).dive();
+      const wrapperDiv = wrapper.find('div').filterWhere((div) => {
+        const className = div.prop('className') || '';
+        return className.includes('DayPickerNavigation__verticalDefault');
+      });
+      expect(wrapperDiv).to.have.lengthOf(0);
+    });
+
+    it('renders default styles when default navigation is used', () => {
+      const wrapper = shallow(
+        <DayPickerNavigation
+          orientation={VERTICAL_ORIENTATION}
+        />,
+      ).dive();
+      const wrapperDiv = wrapper.find('div').filterWhere((div) => {
+        const className = div.prop('className') || '';
+        return className.includes('DayPickerNavigation__verticalDefault');
+      });
+      expect(wrapperDiv).to.have.lengthOf(1);
     });
   });
 
   describe('interactions', () => {
-    it('is triggered by prev month button click', () => {
+    it('props.onPrevMonthClick is triggered by prev month button click', () => {
       const onPrevMonthStub = sinon.stub();
-      const prevMonthButton = shallow(
-        <DayPickerNavigation
-          onPrevMonthClick={onPrevMonthStub}
-        />,
-      ).find('.DayPickerNavigation__prev');
+      const prevMonthButton = shallow(<DayPickerNavigation
+        onPrevMonthClick={onPrevMonthStub}
+      />).dive().find('[role="button"]').at(0);
       prevMonthButton.simulate('click');
       expect(onPrevMonthStub).to.have.property('callCount', 1);
     });
-  });
 
-  describe('interactions', () => {
-    it('is triggered by next month button click', () => {
+    it('props.onNextMonthClick is triggered by next month button click', () => {
       const onNextMonthStub = sinon.stub();
-      const nextMonthButton = shallow(
-        <DayPickerNavigation
-          onNextMonthClick={onNextMonthStub}
-        />,
-      ).find('.DayPickerNavigation__next');
+      const nextMonthButton = shallow(<DayPickerNavigation
+        onNextMonthClick={onNextMonthStub}
+      />).dive().find('[role="button"]').at(1);
       nextMonthButton.simulate('click');
       expect(onNextMonthStub).to.have.property('callCount', 1);
+    });
+
+    it('props.onPrevMonthClick is not triggered by prev month disabled click', () => {
+      const onPrevMonthStub = sinon.stub();
+      const prevMonthButton = shallow(<DayPickerNavigation
+        onPrevMonthClick={onPrevMonthStub}
+        disablePrev
+      />).dive().find('[role="button"]').at(0);
+      prevMonthButton.simulate('click');
+      expect(onPrevMonthStub).to.have.property('callCount', 0);
+    });
+
+    it('props.onNextMonthClick is not triggered by prev month disabled click', () => {
+      const onNextMonthStub = sinon.stub();
+      const nextMonthButton = shallow(<DayPickerNavigation
+        onNextMonthClick={onNextMonthStub}
+        disableNext
+      />).dive().find('[role="button"]').at(1);
+      nextMonthButton.simulate('click');
+      expect(onNextMonthStub).to.have.property('callCount', 0);
+    });
+
+    it('props.onPrevMonthClick is triggered by prev month button key up', () => {
+      const onPrevMonthStub = sinon.stub();
+      const prevMonthButton = shallow(<DayPickerNavigation
+        onPrevMonthClick={onPrevMonthStub}
+      />).dive().find('[role="button"]').at(0);
+      prevMonthButton.simulate('keyup', { key: 'Enter' });
+      expect(onPrevMonthStub).to.have.property('callCount', 1);
+      prevMonthButton.simulate('keyup', { key: ' ' });
+      expect(onPrevMonthStub).to.have.property('callCount', 2);
+      prevMonthButton.simulate('keyup', { key: 'k' });
+      expect(onPrevMonthStub).to.have.property('callCount', 2);
+    });
+
+    it('props.onNextMonthClick is triggered by next month button key up', () => {
+      const onNextMonthStub = sinon.stub();
+      const nextMonthButton = shallow(<DayPickerNavigation
+        onNextMonthClick={onNextMonthStub}
+      />).dive().find('[role="button"]').at(1);
+      nextMonthButton.simulate('keyup', { key: 'Enter' });
+      expect(onNextMonthStub).to.have.property('callCount', 1);
+      nextMonthButton.simulate('keyup', { key: ' ' });
+      expect(onNextMonthStub).to.have.property('callCount', 2);
+      nextMonthButton.simulate('keyup', { key: 'k' });
+      expect(onNextMonthStub).to.have.property('callCount', 2);
+    });
+
+    it('props.onPrevMonthClick is triggered by custom prev month button click', () => {
+      const onPrevMonthStub = sinon.stub();
+      const renderNavPrevButtonStub = sinon.stub().onCall(0).callsFake(({ onClick }) => <button onClick={onClick} type="button">Prev</button>);
+      const prevMonthButton = shallow(<DayPickerNavigation
+        onPrevMonthClick={onPrevMonthStub}
+        renderNavPrevButton={renderNavPrevButtonStub}
+      />).dive().find('button').at(0);
+      prevMonthButton.simulate('click');
+      expect(onPrevMonthStub).to.have.property('callCount', 1);
+    });
+
+    it('props.onNextMonthClick is triggered by custom next month button click', () => {
+      const onNextMonthStub = sinon.stub();
+      const renderNavNextButtonStub = sinon.stub().onCall(0).callsFake(({ onClick }) => <button onClick={onClick} type="button">Next</button>);
+      const nextMonthButton = shallow(<DayPickerNavigation
+        onNextMonthClick={onNextMonthStub}
+        renderNavNextButton={renderNavNextButtonStub}
+      />).dive().find('button').at(0);
+      nextMonthButton.simulate('click');
+      expect(onNextMonthStub).to.have.property('callCount', 1);
+    });
+
+    it('props.onPrevMonthClick is not triggered by custom prev month disabled click', () => {
+      const onPrevMonthStub = sinon.stub();
+      const renderNavPrevButtonStub = sinon.stub().onCall(0).callsFake(({ disabled, onClick }) => <button disabled={disabled} onClick={onClick} type="button">Prev</button>);
+      const prevMonthButton = shallow(<DayPickerNavigation
+        disablePrev
+        onPrevMonthClick={onPrevMonthStub}
+        renderNavPrevButton={renderNavPrevButtonStub}
+      />).dive().find('button').at(0);
+      prevMonthButton.simulate('click');
+      expect(onPrevMonthStub).to.have.property('callCount', 0);
+    });
+
+    it('props.onNextMonthClick is not triggered by custom next month disabled click', () => {
+      const onNextMonthStub = sinon.stub();
+      const renderNavNextButtonStub = sinon.stub().onCall(0).callsFake(({ disabled, onClick }) => <button disabled={disabled} onClick={onClick} type="button">Next</button>);
+      const nextMonthButton = shallow(<DayPickerNavigation
+        disableNext
+        onNextMonthClick={onNextMonthStub}
+        renderNavNextButton={renderNavNextButtonStub}
+      />).dive().find('button').at(0);
+      nextMonthButton.simulate('click');
+      expect(onNextMonthStub).to.have.property('callCount', 0);
+    });
+
+    it('props.onPrevMonthClick is triggered by custom prev month button key up', () => {
+      const onPrevMonthStub = sinon.stub();
+      const renderNavPrevButtonStub = sinon.stub().onCall(0).callsFake(({ onKeyUp }) => <button onKeyUp={onKeyUp} type="button">Prev</button>);
+      const prevMonthButton = shallow(<DayPickerNavigation
+        onPrevMonthClick={onPrevMonthStub}
+        renderNavPrevButton={renderNavPrevButtonStub}
+      />).dive().find('button').at(0);
+      prevMonthButton.simulate('keyup', { key: 'Enter' });
+      expect(onPrevMonthStub).to.have.property('callCount', 1);
+      prevMonthButton.simulate('keyup', { key: ' ' });
+      expect(onPrevMonthStub).to.have.property('callCount', 2);
+      prevMonthButton.simulate('keyup', { key: 'k' });
+      expect(onPrevMonthStub).to.have.property('callCount', 2);
+    });
+
+    it('props.onNextMonthClick is triggered by custom next month button key up', () => {
+      const onNextMonthStub = sinon.stub();
+      const renderNavNextButtonStub = sinon.stub().onCall(0).callsFake(({ onKeyUp }) => <button onKeyUp={onKeyUp} type="button">Next</button>);
+      const nextMonthButton = shallow(<DayPickerNavigation
+        onNextMonthClick={onNextMonthStub}
+        renderNavNextButton={renderNavNextButtonStub}
+      />).dive().find('button').at(0);
+      nextMonthButton.simulate('keyup', { key: 'Enter' });
+      expect(onNextMonthStub).to.have.property('callCount', 1);
+      nextMonthButton.simulate('keyup', { key: ' ' });
+      expect(onNextMonthStub).to.have.property('callCount', 2);
+      nextMonthButton.simulate('keyup', { key: 'k' });
+      expect(onNextMonthStub).to.have.property('callCount', 2);
     });
   });
 });
